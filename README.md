@@ -73,6 +73,10 @@ OmniJS eliminates the fragmentation of modern full-stack JavaScript. Instead of 
 
 ## 🚀 Installation & Quickstart
 
+### Prerequisites
+- **Node.js**: `v22.0.0` or higher (Node 22 Active LTS recommended)
+- **Package Manager**: npm `v10+`, pnpm, yarn, or bun
+
 ```bash
 # Create a new project
 npx omnijsfw create my-fullstack-app

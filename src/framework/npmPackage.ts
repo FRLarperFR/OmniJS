@@ -46,7 +46,8 @@ export function generateNpmPackageFiles(): NpmPackageFile[] {
             url: 'https://github.com/omnijsfw/omni.git',
           },
           engines: {
-            node: '>=18.0.0',
+            node: '>=22.0.0',
+            npm: '>=10.0.0',
           },
         },
         null,
@@ -92,10 +93,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20.x
+      - name: Setup Node.js 22.x (Active LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies

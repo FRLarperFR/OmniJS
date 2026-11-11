@@ -101,6 +101,13 @@ export const DocumentationView: React.FC<DocumentationViewProps> = ({
       description: 'Get an OmniJS project up and running in under 60 seconds.',
       content: (
         <div className="space-y-6">
+          <div className="p-3.5 bg-sky-950/30 border border-sky-500/20 rounded-xl text-xs space-y-1">
+            <span className="font-semibold text-sky-400">Prerequisites</span>
+            <p className="text-slate-300">
+              OmniJS requires <strong>Node.js 22 LTS</strong> (v22.x or later) and npm 10+. Verify your environment with <code className="text-sky-300 font-mono">node -v</code>.
+            </p>
+          </div>
+
           <p className="text-sm text-slate-300">
             Scaffold a fresh full-stack application using the official OmniJS CLI:
           </p>

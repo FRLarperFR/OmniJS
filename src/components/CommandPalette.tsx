@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Search, Terminal, BookOpen, Code2, Cpu, Package, ListTodo, Play, ArrowRight, X } from 'lucide-react';
+import { Search, Terminal, BookOpen, Code2, Cpu, Package, ListTodo, Play, ArrowRight, X, Sparkles } from 'lucide-react';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -41,6 +41,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   const actions: PaletteAction[] = [
+    { id: 'mode-landing', category: 'Navigation', title: 'Open Framework Overview & Landing Page', subtitle: 'Architecture contrast, Bento innovations, and benchmarks', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
     { id: 'mode-docs', category: 'Navigation', title: 'Open Documentation & Guides', subtitle: 'Astro-grade portal with tutorials & API manual', icon: <BookOpen className="w-4 h-4 text-sky-400" /> },
     { id: 'mode-studio', category: 'Navigation', title: 'Open Developer Studio & IDE', subtitle: 'Multi-file code editor, live preview & telemetry', icon: <Code2 className="w-4 h-4 text-sky-400" /> },
     { id: 'open-terminal', category: 'Tooling', title: 'Open CLI Terminal', subtitle: 'Run omni dev, build, test, db:seed, routes', icon: <Terminal className="w-4 h-4 text-amber-400" /> },

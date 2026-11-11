@@ -41,12 +41,13 @@ import { DatabaseJobsView } from './components/DatabaseJobsView';
 import { TestRunnerView } from './components/TestRunnerView';
 import { RpcPlayground } from './components/RpcPlayground';
 import { CommandPalette } from './components/CommandPalette';
+import { LandingPage } from './components/LandingPage';
 import { VsCodeMcpModal } from './components/VsCodeMcpModal';
 import { NpmPublishModal } from './components/NpmPublishModal';
 
 export default function App() {
-  // Navigation Mode: docs vs studio
-  const [appMode, setAppMode] = useState<'docs' | 'studio'>('docs');
+  // Navigation Mode: landing vs docs vs studio
+  const [appMode, setAppMode] = useState<'landing' | 'docs' | 'studio'>('landing');
 
   // Studio Active Tab
   const [studioTab, setStudioTab] = useState<'preview' | 'terminal' | 'tests' | 'rpc' | 'waterfall' | 'bundles' | 'database'>('preview');
@@ -157,7 +158,7 @@ export default function App() {
             href="/"
             onClick={(e) => {
               e.preventDefault();
-              setAppMode('docs');
+              setAppMode('landing');
             }}
             className="text-lg font-black tracking-tight text-white hover:text-sky-400 transition-colors flex items-center gap-2"
           >
@@ -170,7 +171,17 @@ export default function App() {
         </div>
 
         {/* Zone 2: Navigation Links (Desktop) */}
-        <nav className="hidden md:flex items-center gap-3 lg:gap-4 text-xs font-medium text-slate-400">
+        <nav className="hidden md:flex items-center gap-2 lg:gap-3 text-xs font-medium text-slate-400">
+          <button
+            onClick={() => setAppMode('landing')}
+            className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+              appMode === 'landing' ? 'bg-slate-900 text-sky-400 font-semibold' : 'hover:text-slate-200'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Overview</span>
+          </button>
+
           <button
             onClick={() => setAppMode('docs')}
             className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 ${
@@ -265,6 +276,19 @@ export default function App() {
           <div className="grid grid-cols-2 gap-2 text-xs font-medium">
             <button
               onClick={() => {
+                setAppMode('landing');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`p-2.5 rounded-lg flex items-center gap-2 ${
+                appMode === 'landing' ? 'bg-sky-500/10 text-sky-400 font-bold' : 'bg-slate-900 text-slate-300'
+              }`}
+            >
+              <Sparkles className="w-4 h-4 text-sky-400" />
+              <span>Overview</span>
+            </button>
+
+            <button
+              onClick={() => {
                 setAppMode('docs');
                 setIsMobileMenuOpen(false);
               }}
@@ -339,7 +363,23 @@ export default function App() {
       )}
 
       {/* Main Viewport */}
-      {appMode === 'docs' ? (
+      {appMode === 'landing' ? (
+        <LandingPage
+          onLaunchStudio={(templateId) => {
+            if (templateId) setActiveTemplateId(templateId);
+            setAppMode('studio');
+          }}
+          onOpenDocs={(docId) => {
+            setAppMode('docs');
+          }}
+          onOpenTerminal={() => {
+            setAppMode('studio');
+            setStudioTab('terminal');
+          }}
+          onOpenMcp={() => setIsVscodeMcpOpen(true)}
+          onOpenPublish={() => setIsNpmPublishOpen(true)}
+        />
+      ) : appMode === 'docs' ? (
         /* Astro.build-Style Documentation View */
         <DocumentationView
           onOpenInStudio={(snippet) => {
@@ -486,6 +526,7 @@ export default function App() {
         onClose={() => setIsCommandPaletteOpen(false)}
         onNavigate={(action) => {
           if (action === 'open-palette') setIsCommandPaletteOpen(true);
+          else if (action === 'mode-landing') setAppMode('landing');
           else if (action === 'mode-docs') setAppMode('docs');
           else if (action === 'mode-studio') setAppMode('studio');
           else if (action === 'open-terminal') { setAppMode('studio'); setStudioTab('terminal'); }
