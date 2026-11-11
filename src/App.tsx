@@ -23,6 +23,7 @@ import {
   Menu,
   X,
   ListTodo,
+  Zap,
   ExternalLink
 } from 'lucide-react';
 import { TEMPLATES, OmniProjectTemplate } from './framework/templates';
@@ -38,6 +39,8 @@ import { WaterfallTrace } from './components/WaterfallTrace';
 import { AstInspector } from './components/AstInspector';
 import { DatabaseJobsView } from './components/DatabaseJobsView';
 import { TestRunnerView } from './components/TestRunnerView';
+import { RpcPlayground } from './components/RpcPlayground';
+import { CommandPalette } from './components/CommandPalette';
 import { VsCodeMcpModal } from './components/VsCodeMcpModal';
 import { NpmPublishModal } from './components/NpmPublishModal';
 
@@ -46,7 +49,10 @@ export default function App() {
   const [appMode, setAppMode] = useState<'docs' | 'studio'>('docs');
 
   // Studio Active Tab
-  const [studioTab, setStudioTab] = useState<'preview' | 'terminal' | 'tests' | 'waterfall' | 'bundles' | 'database'>('preview');
+  const [studioTab, setStudioTab] = useState<'preview' | 'terminal' | 'tests' | 'rpc' | 'waterfall' | 'bundles' | 'database'>('preview');
+
+  // Command Palette
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   // Mobile Studio View: 'editor' vs 'tools'
   const [mobileStudioView, setMobileStudioView] = useState<'editor' | 'tools'>('editor');
@@ -199,6 +205,17 @@ export default function App() {
           >
             <ListTodo className="w-3.5 h-3.5 text-emerald-400" />
             <span>Feature Tracker</span>
+          </button>
+
+          <button
+            onClick={() => setIsCommandPaletteOpen(true)}
+            className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white flex items-center gap-2 transition-colors"
+            title="Search & Command Palette"
+          >
+            <span className="text-[11px] font-sans">Search</span>
+            <kbd className="px-1.5 py-0.5 text-[9px] font-mono text-slate-500 bg-slate-950 rounded border border-slate-800">
+              ⌘K
+            </kbd>
           </button>
         </nav>
 
@@ -370,6 +387,7 @@ export default function App() {
                 <option value="preview">Live Preview</option>
                 <option value="terminal">CLI Terminal</option>
                 <option value="tests">Contract Tests</option>
+                <option value="rpc">RPC Tester</option>
                 <option value="waterfall">Waterfall Trace</option>
                 <option value="bundles">AST &amp; Bundles</option>
                 <option value="database">DB &amp; Jobs</option>
@@ -411,6 +429,7 @@ export default function App() {
                   { id: 'preview', label: 'App Preview', icon: <Monitor className="w-3.5 h-3.5" /> },
                   { id: 'terminal', label: 'CLI Terminal', icon: <Terminal className="w-3.5 h-3.5" /> },
                   { id: 'tests', label: 'Contract Tests', icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+                  { id: 'rpc', label: 'RPC Tester', icon: <Zap className="w-3.5 h-3.5" /> },
                   { id: 'waterfall', label: 'Waterfall Trace', icon: <Activity className="w-3.5 h-3.5" /> },
                   { id: 'bundles', label: 'AST & Bundles', icon: <Layers className="w-3.5 h-3.5" /> },
                   { id: 'database', label: 'DB & Jobs', icon: <Database className="w-3.5 h-3.5" /> },
@@ -447,6 +466,8 @@ export default function App() {
 
               {studioTab === 'tests' && <TestRunnerView ast={ast} />}
 
+              {studioTab === 'rpc' && <RpcPlayground ast={ast} />}
+
               {studioTab === 'waterfall' && <WaterfallTrace />}
 
               {studioTab === 'bundles' && (
@@ -458,6 +479,25 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onNavigate={(action) => {
+          if (action === 'open-palette') setIsCommandPaletteOpen(true);
+          else if (action === 'mode-docs') setAppMode('docs');
+          else if (action === 'mode-studio') setAppMode('studio');
+          else if (action === 'open-terminal') { setAppMode('studio'); setStudioTab('terminal'); }
+          else if (action === 'open-tests') { setAppMode('studio'); setStudioTab('tests'); }
+          else if (action === 'open-rpc') { setAppMode('studio'); setStudioTab('rpc'); }
+          else if (action === 'template-shoppulse') setActiveTemplateId('shoppulse-multi');
+          else if (action === 'template-tasksprint') setActiveTemplateId('tasksprint-single');
+          else if (action === 'open-vscode') setIsVscodeMcpOpen(true);
+          else if (action === 'open-publish') setIsNpmPublishOpen(true);
+          else if (action === 'open-status') setIsStatusOpen(true);
+        }}
+      />
 
       {/* VS Code & MCP Modal */}
       <VsCodeMcpModal
