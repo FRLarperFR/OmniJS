@@ -37,6 +37,7 @@ import { RuntimePreview } from './components/RuntimePreview';
 import { WaterfallTrace } from './components/WaterfallTrace';
 import { AstInspector } from './components/AstInspector';
 import { DatabaseJobsView } from './components/DatabaseJobsView';
+import { TestRunnerView } from './components/TestRunnerView';
 import { VsCodeMcpModal } from './components/VsCodeMcpModal';
 import { NpmPublishModal } from './components/NpmPublishModal';
 
@@ -45,7 +46,7 @@ export default function App() {
   const [appMode, setAppMode] = useState<'docs' | 'studio'>('docs');
 
   // Studio Active Tab
-  const [studioTab, setStudioTab] = useState<'preview' | 'terminal' | 'waterfall' | 'bundles' | 'database'>('preview');
+  const [studioTab, setStudioTab] = useState<'preview' | 'terminal' | 'tests' | 'waterfall' | 'bundles' | 'database'>('preview');
 
   // Mobile Studio View: 'editor' vs 'tools'
   const [mobileStudioView, setMobileStudioView] = useState<'editor' | 'tools'>('editor');
@@ -368,6 +369,7 @@ export default function App() {
               >
                 <option value="preview">Live Preview</option>
                 <option value="terminal">CLI Terminal</option>
+                <option value="tests">Contract Tests</option>
                 <option value="waterfall">Waterfall Trace</option>
                 <option value="bundles">AST &amp; Bundles</option>
                 <option value="database">DB &amp; Jobs</option>
@@ -408,6 +410,7 @@ export default function App() {
                 {[
                   { id: 'preview', label: 'App Preview', icon: <Monitor className="w-3.5 h-3.5" /> },
                   { id: 'terminal', label: 'CLI Terminal', icon: <Terminal className="w-3.5 h-3.5" /> },
+                  { id: 'tests', label: 'Contract Tests', icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
                   { id: 'waterfall', label: 'Waterfall Trace', icon: <Activity className="w-3.5 h-3.5" /> },
                   { id: 'bundles', label: 'AST & Bundles', icon: <Layers className="w-3.5 h-3.5" /> },
                   { id: 'database', label: 'DB & Jobs', icon: <Database className="w-3.5 h-3.5" /> },
@@ -441,6 +444,8 @@ export default function App() {
               )}
 
               {studioTab === 'terminal' && <CliTerminal ast={ast} />}
+
+              {studioTab === 'tests' && <TestRunnerView ast={ast} />}
 
               {studioTab === 'waterfall' && <WaterfallTrace />}
 
