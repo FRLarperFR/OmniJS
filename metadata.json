@@ -1,0 +1,6 @@
+{
+  "name": "OmniJS - Custom Full-Stack JS Framework & Studio",
+  "description": "An all-in-one full-stack JavaScript framework with custom multi-block .omni format, AST compiler, in-browser runtime, CLI toolchain, VS Code extension, MCP server, and astro-grade documentation portal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
