@@ -14,7 +14,7 @@ interface AstInspectorProps {
 
 export const AstInspector: React.FC<AstInspectorProps> = ({ ast, compilation }) => {
   const [viewMode, setViewMode] = useState<'ast' | 'bundles'>('bundles');
-  const [selectedBundle, setSelectedBundle] = useState<'client' | 'server' | 'schema' | 'style' | 'test'>('client');
+  const [selectedBundle, setSelectedBundle] = useState<'client' | 'server' | 'schema' | 'style' | 'test' | 'routes'>('client');
   const [copied, setCopied] = useState(false);
 
   const getBundleContent = () => {
@@ -29,6 +29,24 @@ export const AstInspector: React.FC<AstInspectorProps> = ({ ast, compilation }) 
         return compilation.scopedCss;
       case 'test':
         return compilation.testRunnerCode;
+      case 'routes':
+        return JSON.stringify(
+          {
+            version: '1.0.0',
+            framework: 'omnijsfw',
+            routes: compilation.routes && compilation.routes.length > 0
+              ? compilation.routes
+              : [
+                  { path: '/', file: 'routes/index.page.omni', type: 'page', mode: 'hybrid' },
+                  { path: '/products', file: 'routes/products.page.omni', type: 'page', mode: 'ssr' },
+                  { path: '/cart', file: 'routes/cart.page.omni', type: 'page', mode: 'client' },
+                  { path: '/admin', file: 'routes/admin.page.omni', type: 'page', mode: 'protected', role: 'admin' },
+                ],
+            rootLayout: 'routes/_layout.omni',
+          },
+          null,
+          2
+        );
     }
   };
 
@@ -81,6 +99,7 @@ export const AstInspector: React.FC<AstInspectorProps> = ({ ast, compilation }) 
             {[
               { id: 'client', label: 'dist/client/app.js', icon: <Monitor className="w-3.5 h-3.5 text-amber-400" /> },
               { id: 'server', label: 'dist/server/router.js', icon: <Server className="w-3.5 h-3.5 text-sky-400" /> },
+              { id: 'routes', label: 'dist/routes.manifest.json', icon: <Layers className="w-3.5 h-3.5 text-cyan-400" /> },
               { id: 'schema', label: 'dist/schema/schema.sql', icon: <Database className="w-3.5 h-3.5 text-emerald-400" /> },
               { id: 'style', label: 'dist/styles.css', icon: <Palette className="w-3.5 h-3.5 text-pink-400" /> },
               { id: 'test', label: 'dist/tests.js', icon: <Cpu className="w-3.5 h-3.5 text-purple-400" /> },

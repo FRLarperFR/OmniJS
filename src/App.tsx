@@ -62,7 +62,7 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Active Project Template
-  const [activeTemplateId, setActiveTemplateId] = useState<string>('shoppulse-multi');
+  const [activeTemplateId, setActiveTemplateId] = useState<string>('omni-multipage');
   const currentTemplate = TEMPLATES.find((t) => t.id === activeTemplateId) || TEMPLATES[0];
 
   // Project Files state
@@ -245,7 +245,11 @@ export default function App() {
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  {t.id === 'shoppulse-multi' ? 'ShopPulse (Multi)' : 'TaskSprint (Single)'}
+                  {t.id === 'omni-multipage'
+                    ? 'OmniStore (MPA)'
+                    : t.id === 'shoppulse-multi'
+                    ? 'ShopPulse (Multi)'
+                    : 'TaskSprint (Single)'}
                 </button>
               ))}
             </div>
@@ -353,7 +357,11 @@ export default function App() {
                         : 'bg-slate-900 text-slate-400'
                     }`}
                   >
-                    {t.id === 'shoppulse-multi' ? 'ShopPulse' : 'TaskSprint'}
+                    {t.id === 'omni-multipage'
+                      ? 'OmniStore (MPA)'
+                      : t.id === 'shoppulse-multi'
+                      ? 'ShopPulse'
+                      : 'TaskSprint'}
                   </button>
                 ))}
               </div>
@@ -532,6 +540,7 @@ export default function App() {
           else if (action === 'open-terminal') { setAppMode('studio'); setStudioTab('terminal'); }
           else if (action === 'open-tests') { setAppMode('studio'); setStudioTab('tests'); }
           else if (action === 'open-rpc') { setAppMode('studio'); setStudioTab('rpc'); }
+          else if (action === 'template-multipage') setActiveTemplateId('omni-multipage');
           else if (action === 'template-shoppulse') setActiveTemplateId('shoppulse-multi');
           else if (action === 'template-tasksprint') setActiveTemplateId('tasksprint-single');
           else if (action === 'open-vscode') setIsVscodeMcpOpen(true);

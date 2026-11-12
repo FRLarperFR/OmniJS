@@ -21,7 +21,8 @@ import {
   Copy,
   Check,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  Globe
 } from 'lucide-react';
 import { OmniFileAST } from '../framework/parser';
 import { OmniProjectFile } from '../framework/templates';
@@ -123,7 +124,9 @@ export const EditorView: React.FC<EditorViewProps> = ({
             {files.map((file) => {
               const isActive = file.name === activeFileName;
               let icon = <FileCode className="w-3.5 h-3.5 text-slate-400" />;
-              if (file.name.includes('.db.')) icon = <Database className="w-3.5 h-3.5 text-emerald-400" />;
+              if (file.name.includes('.page.') || file.name.startsWith('routes/')) icon = <Globe className="w-3.5 h-3.5 text-cyan-400" />;
+              else if (file.name.includes('_layout')) icon = <Layers className="w-3.5 h-3.5 text-indigo-400" />;
+              else if (file.name.includes('.db.')) icon = <Database className="w-3.5 h-3.5 text-emerald-400" />;
               else if (file.name.includes('.server.')) icon = <Server className="w-3.5 h-3.5 text-sky-400" />;
               else if (file.name.includes('.client.')) icon = <Monitor className="w-3.5 h-3.5 text-amber-400" />;
               else if (file.name.includes('.style.')) icon = <Palette className="w-3.5 h-3.5 text-pink-400" />;
@@ -204,6 +207,11 @@ export const EditorView: React.FC<EditorViewProps> = ({
               </button>
             )}
             <span className="font-semibold text-slate-200 truncate">{activeFile?.name}</span>
+            {ast.pageRoute?.path && (
+              <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.2 rounded font-bold">
+                PAGE {ast.pageRoute.path}
+              </span>
+            )}
             <span className="text-slate-500 hidden sm:inline">·</span>
             <span className="text-slate-400 hidden sm:inline">{lineCount} lines</span>
           </div>

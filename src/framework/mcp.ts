@@ -41,6 +41,12 @@ export const MCP_RESOURCES: McpResource[] = [
     description: 'Introspected queries, mutations, background jobs, and auth requirements',
     mimeType: 'application/json',
   },
+  {
+    uri: 'omni://routes/manifest',
+    name: 'Multi-Page Application Routes Manifest',
+    description: 'File-based page routes (/, /products, /cart, /admin) and root layouts tree',
+    mimeType: 'application/json',
+  },
 ];
 
 export const MCP_TOOLS: McpTool[] = [

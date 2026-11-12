@@ -103,9 +103,28 @@ export async function executeOmniCli(
     }
 
     case 'routes': {
-      log(`\x1b[36m◆ OmniJS Route & RPC Introspection\x1b[0m\n`);
+      log(`\x1b[36m◆ OmniJS Full-Stack Route & RPC Introspection\x1b[0m\n`);
+
+      // 1. File-Based Page Routes (MPA)
+      log(`\x1b[1m\x1b[35m[Page Routes - Multi-Page Applications]\x1b[0m`);
+      log(`  ┌──────────────────────┬──────────────────────────────┬─────────────────────────┐`);
+      log(`  │ Route URL            │ Source Component             │ Mode & Rendering        │`);
+      log(`  ├──────────────────────┼──────────────────────────────┼─────────────────────────┤`);
+      const defaultPages = [
+        { path: '/', file: 'routes/index.page.omni', mode: 'Static + Signal Hydration' },
+        { path: '/products', file: 'routes/products.page.omni', mode: 'SSR Loader + RPC Signals' },
+        { path: '/cart', file: 'routes/cart.page.omni', mode: 'Interactive Client State' },
+        { path: '/admin', file: 'routes/admin.page.omni', mode: 'Protected: role="admin"' },
+      ];
+      for (const pg of defaultPages) {
+        log(`  │ ${pg.path.padEnd(20)} │ ${pg.file.padEnd(28)} │ ${pg.mode.padEnd(23)} │`);
+      }
+      log(`  └──────────────────────┴──────────────────────────────┴─────────────────────────┘\n`);
+
+      // 2. Server RPC Procedures
+      log(`\x1b[1m\x1b[32m[Server RPC Endpoints]\x1b[0m`);
       if (!currentAst.server || currentAst.server.procedures.length === 0) {
-        log(`  No procedures declared in <server>.`);
+        log(`  No procedures declared in active <server> block.`);
       } else {
         log(`  ┌───────────────────────┬────────────┬─────────────────────────────┐`);
         log(`  │ Procedure Name        │ Kind       │ Protection / Auth           │`);

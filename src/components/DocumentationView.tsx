@@ -263,6 +263,70 @@ export const DocumentationView: React.FC<DocumentationViewProps> = ({
       ),
     },
     {
+      id: 'multi-page-routing',
+      category: 'Guides & Deep Dives',
+      title: 'File-Based Routing & Multi-Page Apps',
+      description: 'Build high-performance multi-page applications with routes/*.page.omni, root layouts, and client-side page transitions.',
+      content: (
+        <div className="space-y-6">
+          <p className="text-sm text-slate-300">
+            OmniJS features a zero-configuration <strong>file-based routing system</strong> for multi-page applications. Files inside the <code className="text-sky-300 font-mono">routes/</code> directory ending in <code className="text-sky-300 font-mono">.page.omni</code> automatically map to browser URL paths:
+          </p>
+
+          {/* Directory Tree */}
+          <div className="border border-slate-800 rounded-xl p-4 bg-slate-950 font-mono text-xs space-y-1 text-slate-300">
+            <div className="text-slate-500">// Multi-Page Application routing tree:</div>
+            <div>routes/</div>
+            <div>├── _layout.omni          <span className="text-slate-500"># Shared shell (Navbar, Footer & &lt;slot /&gt;)</span></div>
+            <div>├── index.page.omni       <span className="text-emerald-400 font-bold">/</span> <span className="text-slate-500">(Home Overview)</span></div>
+            <div>├── products.page.omni    <span className="text-emerald-400 font-bold">/products</span> <span className="text-slate-500">(Catalog & Search)</span></div>
+            <div>├── cart.page.omni        <span className="text-emerald-400 font-bold">/cart</span> <span className="text-slate-500">(Interactive Cart & Checkout)</span></div>
+            <div>├── admin.page.omni       <span className="text-emerald-400 font-bold">/admin</span> <span className="text-slate-500">(@protect role="admin")</span></div>
+            <div>└── blog/</div>
+            <div>    └── [id].page.omni    <span className="text-emerald-400 font-bold">/blog/:id</span> <span className="text-slate-500">(Dynamic parameter)</span></div>
+          </div>
+
+          {/* Code Example */}
+          <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
+            <div className="h-9 px-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>routes/products.page.omni</span>
+              <span className="text-emerald-400">PAGE: /products</span>
+            </div>
+            <pre className="p-4 font-mono text-xs text-slate-200 overflow-x-auto leading-relaxed">
+{`<client page="/products">
+  export default function ProductsPage() {
+    const { data: items, loading } = $query(server.getCatalog);
+    const [addToCart] = $mutation(server.addToCart, { invalidate: ["cart", "stats"] });
+
+    return (
+      <div className="catalog">
+        <h1>Hardware Catalog</h1>
+        <div className="grid">
+          {items?.map(p => (
+            <div key={p.id} className="card">
+              <h3>{p.title}</h3>
+              <span>\${p.price}</span>
+              <button on:click={() => addToCart({ productId: p.id })}>+ Add to Cart</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+</client>`}
+            </pre>
+          </div>
+
+          <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
+            <h4 className="text-xs font-semibold text-sky-400">Root Layouts &amp; Client Transitions</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Files named <code className="text-slate-300">_layout.omni</code> wrap all sibling and nested page components with a shared application shell. Navigating between pages uses client-side transitions, avoiding full-page reloads and keeping reactive client signals (such as live shopping cart counters) in sync.
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
       id: 'vscode-mcp',
       category: 'Tooling & IDE',
       title: 'VS Code Extension & MCP Knowledge Base',

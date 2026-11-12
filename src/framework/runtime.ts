@@ -208,6 +208,37 @@ class VirtualRuntime {
             title: search ? { contains: search } : undefined,
           },
         });
+      } else if (procedureName === 'getCart') {
+        const cartItems = (dbClient as any).CartItem.findMany();
+        const allProducts = (dbClient as any).Product.findMany();
+        result = cartItems.map((c: any) => {
+          const prod = allProducts.find((p: any) => p.id === c.productId) || {
+            title: 'Item',
+            price: 0,
+            inventory: 0,
+          };
+          return {
+            ...c,
+            product: prod,
+            subtotal: prod.price * (c.quantity || 1),
+          };
+        });
+      } else if (procedureName === 'getOrders') {
+        result = (dbClient as any).Order.findMany({ orderBy: { id: 'desc' } });
+      } else if (procedureName === 'getStats') {
+        const productsCount = (dbClient as any).Product.findMany().length;
+        const ordersList = (dbClient as any).Order.findMany();
+        const cartList = (dbClient as any).CartItem.findMany();
+        const cartCount = cartList.reduce((acc: number, item: any) => acc + (item.quantity || 1), 0);
+        const revenue = ordersList.reduce((acc: number, o: any) => acc + (o.total || 0), 0);
+        result = {
+          totalProducts: productsCount,
+          totalOrders: ordersList.length,
+          cartCount,
+          revenue,
+          activeRoutes: 4,
+          serverStatus: 'healthy',
+        };
       } else if (procedureName === 'getTasks') {
         result = (dbClient as any).Task.findMany();
       } else if (procedureName === 'getTelemetry') {
@@ -312,7 +343,83 @@ class VirtualRuntime {
     let result: any = null;
 
     try {
-      if (procedureName === 'createOrder' || procedureName === 'purchase') {
+      if (procedureName === 'addToCart') {
+        const product = (dbClient as any).Product.findById(args.productId);
+        if (!product) throw new Error(`Product not found: ${args.productId}`);
+        const existingItems = (dbClient as any).CartItem.findMany();
+        const existing = existingItems.find((c: any) => c.productId === args.productId);
+        if (existing) {
+          result = (dbClient as any).CartItem.update(existing.id, {
+            quantity: existing.quantity + (args.quantity || 1),
+          });
+        } else {
+          result = (dbClient as any).CartItem.create({
+            productId: args.productId,
+            quantity: args.quantity || 1,
+          });
+        }
+      } else if (procedureName === 'updateCartQuantity') {
+        if (args.quantity <= 0) {
+          result = (dbClient as any).CartItem.delete(args.id);
+        } else {
+          result = (dbClient as any).CartItem.update(args.id, { quantity: args.quantity });
+        }
+      } else if (procedureName === 'clearCart') {
+        const items = (dbClient as any).CartItem.findMany();
+        for (const item of items) {
+          (dbClient as any).CartItem.delete(item.id);
+        }
+        result = { cleared: items.length };
+      } else if (procedureName === 'checkoutCart') {
+        const cartItems = (dbClient as any).CartItem.findMany();
+        if (cartItems.length === 0) throw new Error('Cart is empty');
+        
+        let grandTotal = 0;
+        const allProducts = (dbClient as any).Product.findMany();
+        
+        for (const c of cartItems) {
+          const prod = allProducts.find((p: any) => p.id === c.productId);
+          if (prod) {
+            grandTotal += prod.price * (c.quantity || 1);
+            (dbClient as any).Product.update(prod.id, {
+              inventory: Math.max(0, prod.inventory - (c.quantity || 1)),
+            });
+          }
+          (dbClient as any).CartItem.delete(c.id);
+        }
+
+        result = (dbClient as any).Order.create({
+          customerEmail: args.customerEmail || this.currentSession.email,
+          itemCount: cartItems.length,
+          total: Math.round(grandTotal * 100) / 100,
+          status: 'confirmed',
+          createdAt: new Date().toISOString(),
+        });
+
+        jobQueue.dispatch('sendConfirmationEmail', {
+          orderId: result.id,
+          customerEmail: result.customerEmail,
+          total: result.total,
+        });
+
+        spans.push({
+          id: `span_jobs`,
+          stage: 'job',
+          label: `Enqueued asynchronous job 'sendConfirmationEmail' for Order #${result.id}`,
+          durationMs: 0.8,
+          timestamp: Date.now(),
+        });
+      } else if (procedureName === 'addProduct') {
+        result = (dbClient as any).Product.create({
+          title: args.title || 'New Product',
+          category: args.category || 'general',
+          price: Number(args.price) || 99.0,
+          inventory: Number(args.inventory) || 10,
+          badge: args.badge || 'New',
+        });
+      } else if (procedureName === 'deleteProduct') {
+        result = (dbClient as any).Product.delete(args.id);
+      } else if (procedureName === 'createOrder' || procedureName === 'purchase') {
         const product = (dbClient as any).Product.findById(args.productId);
         if (!product) throw new Error(`Product not found: ${args.productId}`);
         if (product.inventory < (args.quantity || 1)) {

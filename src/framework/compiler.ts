@@ -6,12 +6,21 @@
 import { OmniFileAST, SchemaTable, SchemaField } from './parser';
 import { analyzeSecurity } from './security';
 
+export interface RouteManifestEntry {
+  path: string;
+  file: string;
+  type: 'page' | 'api' | 'layout';
+  auth?: string;
+  isDynamic?: boolean;
+}
+
 export interface CompilationResult {
   clientCode: string;
   serverRouterCode: string;
   schemaSql: string;
   scopedCss: string;
   testRunnerCode: string;
+  routes: RouteManifestEntry[];
   diagnostics: Array<{ severity: 'error' | 'warning' | 'info'; message: string; line: number }>;
   metrics: {
     clientBytes: number;
@@ -258,12 +267,34 @@ export function compileOmni(ast: OmniFileAST): CompilationResult {
 
   const compilationTimeMs = Math.round((performance.now() - startTime) * 100) / 100;
 
+  const routes: RouteManifestEntry[] = [];
+  if (ast.pageRoute) {
+    routes.push({
+      path: ast.pageRoute.path,
+      file: ast.fileName,
+      type: 'page',
+      auth: ast.pageRoute.auth,
+      isDynamic: ast.pageRoute.isDynamic,
+    });
+  }
+  if (ast.server) {
+    for (const p of ast.server.procedures) {
+      routes.push({
+        path: `/api/rpc/${p.name}`,
+        file: ast.fileName,
+        type: 'api',
+        auth: p.protection?.role || ast.server.authMode,
+      });
+    }
+  }
+
   return {
     clientCode,
     serverRouterCode,
     schemaSql,
     scopedCss,
     testRunnerCode,
+    routes,
     diagnostics,
     metrics: {
       clientBytes,

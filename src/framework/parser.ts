@@ -119,10 +119,19 @@ export interface TestBlockAST {
   location: SourceLocation;
 }
 
+export interface PageRouteInfo {
+  path: string;
+  title: string;
+  auth?: string;
+  isDynamic?: boolean;
+  layout?: string;
+}
+
 export interface OmniFileAST {
   fileName: string;
   isMultiFile: boolean;
-  multiFileType?: 'db' | 'server' | 'client' | 'style' | 'test';
+  multiFileType?: 'db' | 'server' | 'client' | 'style' | 'test' | 'page' | 'layout';
+  pageRoute?: PageRouteInfo;
   schema?: SchemaBlockAST;
   server?: ServerBlockAST;
   client?: ClientBlockAST;
@@ -530,7 +539,7 @@ export function parseOmniFile(content: string, fileName = 'app.omni'): OmniFileA
   
   // Detect if multi-file based on suffix e.g. schema.db.omni, routes.server.omni
   let isMultiFile = false;
-  let multiFileType: 'db' | 'server' | 'client' | 'style' | 'test' | undefined;
+  let multiFileType: 'db' | 'server' | 'client' | 'style' | 'test' | 'page' | 'layout' | undefined;
 
   if (fileName.endsWith('.db.omni')) {
     isMultiFile = true;
@@ -547,6 +556,12 @@ export function parseOmniFile(content: string, fileName = 'app.omni'): OmniFileA
   } else if (fileName.endsWith('.test.omni')) {
     isMultiFile = true;
     multiFileType = 'test';
+  } else if (fileName.includes('_layout')) {
+    isMultiFile = true;
+    multiFileType = 'layout';
+  } else if (fileName.endsWith('.page.omni') || fileName.startsWith('routes/')) {
+    isMultiFile = true;
+    multiFileType = 'page';
   }
 
   // Extract custom blocks
@@ -592,7 +607,7 @@ export function parseOmniFile(content: string, fileName = 'app.omni'): OmniFileA
       schemaBlock = parseSchemaBlock(content, 1, diagnostics);
     } else if (multiFileType === 'server') {
       serverBlock = parseServerBlock(content, 1, {}, diagnostics);
-    } else if (multiFileType === 'client') {
+    } else if (multiFileType === 'client' || multiFileType === 'page') {
       clientBlock = parseClientBlock(content, 1, diagnostics);
     } else if (multiFileType === 'style') {
       styleBlock = parseStyleBlock(content, 1, { scoped: 'true' });
@@ -601,10 +616,47 @@ export function parseOmniFile(content: string, fileName = 'app.omni'): OmniFileA
     }
   }
 
+  // Derive page route metadata for multi-page apps
+  let pageRoute: PageRouteInfo | undefined;
+  const isPageCandidate =
+    multiFileType === 'page' ||
+    fileName.includes('.page.') ||
+    fileName.startsWith('routes/') ||
+    fileName === 'app.omni' ||
+    fileName.includes('store.client');
+
+  if (isPageCandidate) {
+    let routePath = '/';
+    if (fileName.includes('products')) routePath = '/products';
+    else if (fileName.includes('cart')) routePath = '/cart';
+    else if (fileName.includes('admin')) routePath = '/admin';
+    else if (fileName.includes('checkout')) routePath = '/checkout';
+    else if (fileName.includes('analytics')) routePath = '/analytics';
+    else if (fileName.includes('settings')) routePath = '/settings';
+    else if (fileName.includes('index') || fileName === 'app.omni' || fileName.includes('store.client')) routePath = '/';
+    else {
+      const match = fileName.match(/routes\/(.+?)(?:\.page)?\.omni/);
+      if (match) routePath = '/' + match[1].replace(/\[(.+?)\]/g, ':$1');
+    }
+
+    const title =
+      routePath === '/'
+        ? 'Home'
+        : routePath.slice(1).charAt(0).toUpperCase() + routePath.slice(2);
+
+    pageRoute = {
+      path: routePath,
+      title,
+      isDynamic: routePath.includes(':'),
+      auth: serverBlock?.authMode,
+    };
+  }
+
   return {
     fileName,
     isMultiFile,
     multiFileType,
+    pageRoute,
     schema: schemaBlock,
     server: serverBlock,
     client: clientBlock,
